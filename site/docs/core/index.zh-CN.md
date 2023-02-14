@@ -1,19 +1,29 @@
 ---
-title: 核心功能
-order: 0
-nav:
-  title: 核心功能
-  order: 3
----
 
-- 本地开发
-- 单元测试
-- 应用部署
-- 日志
-- HttpClient
-- Cookie 与 Session
-- 多进程模型和进程间通讯
-- View 模板渲染
-- 异常处理
-- 安全
-- 国际化（I18n）
+function error(){
+    return async (ctx,next) => {
+        try {
+            await next() 
+            return
+        } catch (error) {
+            const status = error.status || 500
+            
+            ctx.body = {
+                code:status,
+                msg: error.message
+            }
+            ctx.app.emit('error',error, ctx )
+
+            if(status == 401){
+                ctx.body = {
+                    code:status,
+                    msg: '鉴权失败，请检查token是否传递或者有效'
+                }
+                return
+            }
+        }
+    }
+}
+
+
+module.exports = error
